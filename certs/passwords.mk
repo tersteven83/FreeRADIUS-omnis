@@ -1,0 +1,6 @@
+PASSWORD_SERVER	= 'typhon'
+PASSWORD_INNER	= 'whatever'
+PASSWORD_CA	= 'typhon'
+PASSWORD_CLIENT	= 'whatever'
+USER_NAME	= 'user@example.org'
+CA_DEFAULT_DAYS  = '60'

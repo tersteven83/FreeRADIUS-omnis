@@ -1,0 +1,2 @@
+ATTRIBUTE	Monthly-Bandwidth	3000	Integer
+ATTRIBUTE	Expire-After		3001	Integer
