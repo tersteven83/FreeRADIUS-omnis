@@ -1,0 +1,142 @@
+server omnis_guest {
+listen {
+	ipaddr = *
+	port = 2812
+	type = auth
+	limit{
+		max_connections = 16
+		lifetime = 0
+		idle_timeout = 30
+	}
+}
+listen {
+	ipaddr = *
+	port = 2813
+	type = acct
+	limit{
+		
+	}
+}
+
+authorize {
+	filter_username
+	filter_password
+	preprocess
+	chap
+	mschap
+	suffix
+	files
+	sql
+	python3
+	# ty tsy maintsy farany
+	pap
+	expiration
+	logintime
+	if (userlock) {
+		update reply{
+			Reply-Message := "Votre session a expiré"
+		}
+	}
+}
+
+authenticate {
+	Auth-Type PAP {
+		pap
+	}
+	Auth-Type CHAP{
+		chap
+	}
+	Auth-Type MS-CHAP {
+		mschap
+	}
+	mschap
+}
+
+preacct{
+	preprocess
+
+	# start time
+	update request {
+		&FreeRADIUS-Acct-Session-Start-Time = "%{expr: %l - %{%{Acct-Session-Time}:-0} - %{%{Acct-Delay-Time}:-0}}"
+	}
+
+	acct_unique
+	suffix
+}
+
+accounting {
+	detail
+	sql
+	exec
+	attr_filter.accounting_response
+}
+
+session {
+	sql
+}
+
+post-auth {
+	reply_log
+	sql
+	exec
+	dailycounter
+	daily_limit
+	
+	if(!config:Expiration){	
+		# si l'utilisateur a une connexion de une journee, on definie sa date d'expiration +1jr
+		if(&SQL-Group == "Daily-Connection"){
+			update{
+				&Expiration = "%{expr: %l + 86400}"
+			}
+		}
+
+		# si l'utilisateur a une connexion d'une semaine, on definie sa date d'expiration +7jrs
+		elsif(&SQL-Group == "Weekly-Connection"){
+			update{
+				&Expiration = "%{expr: %l + 604800}"
+			}
+		}
+
+		# si l'utilisateur a une connexion de 1 mois, on definie sa date d'expiration +30jrs
+		elsif(&SQL-Group == "Monthly-Connection"){
+			# verifier si l'AVP Expiration n'existe
+			update{
+				&Expiration = "%{expr: %l + 2592000}"
+			}
+		}
+	
+		# si l'utilisateur a une connexion de 3 mois, on definie sa date d'expiration 3mois
+		elsif(&SQL-Group == "3 Months"){
+			update{
+				&Expiration = "%{expr: %l + 7776000}"
+			}
+		}
+
+		# si l'utilisateur a une connexion de 6 mois, on definie sa date d'expiration 6mois
+		elsif(&SQL-Group == "6 Months"){
+			update{
+				&Expiration = "%{expr: %l + 15552000}"
+			}
+		}
+		if(&Expiration){
+			%{sql: INSERT INTO radcheck(username, attribute, op, value) VALUES('%{%{Stripped-User-Name}:-%{User-Name}}', 'Expiration', ':=', '%{date_to_daloradius:&Expiration}')}
+			updated	
+		}
+	}
+
+
+
+
+		Post-Auth-Type REJECT {
+		-sql
+		attr_filter.access_reject
+		remove_reply_message_if_eap
+		if(SQL-Group == "Guest"){
+			update reply {
+				WISPr-Redirection-URL := "http://192.168.11.150:8080/auth/number"
+			}
+		}
+					
+		}
+}
+}
