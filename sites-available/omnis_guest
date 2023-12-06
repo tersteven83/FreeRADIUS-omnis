@@ -30,12 +30,26 @@ authorize {
 	python3
 	# ty tsy maintsy farany
 	pap
-	expiration
-	logintime
-	if (userlock) {
+
+	logintime{
+		userlock = 1
+	}
+	if(userlock){
 		update reply{
-			Reply-Message := "Votre session a expiré"
+			Reply-Message := "Votre heure de connexion est entre %{control:Login-Time}"
+
 		}
+		reject
+	}
+
+	expiration{
+		userlock = 1
+	}
+	if(userlock){
+		update reply{
+			Reply-Message := "Votre session est expiré"
+		}
+		reject
 	}
 }
 
@@ -50,6 +64,8 @@ authenticate {
 		mschap
 	}
 	mschap
+	
+
 }
 
 preacct{
@@ -123,11 +139,8 @@ post-auth {
 			updated	
 		}
 	}
-
-
-
-
-		Post-Auth-Type REJECT {
+	
+	Post-Auth-Type REJECT {
 		-sql
 		attr_filter.access_reject
 		remove_reply_message_if_eap
@@ -135,8 +148,7 @@ post-auth {
 			update reply {
 				WISPr-Redirection-URL := "http://192.168.11.150:8080/auth/number"
 			}
-		}
-					
-		}
+		}	
+	}
 }
 }

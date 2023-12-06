@@ -1,7 +1,8 @@
 "alice" Cleartext-Password := "passme"
-	Tunnel-Type = VLAN, 
-	Tunnel-Medium-Type = IEEE-802, 
-	Tunnel-Private-Group-ID = "100"
+#	Expiration := "Apr 3 2014",	
+#	Tunnel-Type = VLAN, 
+#	Tunnel-Medium-Type = IEEE-802, 
+#	Tunnel-Private-Group-ID = "100"
 #
 # 	Configuration file for the rlm_files module.
 # 	Please see rlm_files(5) manpage for more information.
