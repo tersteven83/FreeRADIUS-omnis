@@ -156,7 +156,7 @@ sqlcounter daily_limit{
 sqlcounter weekly_limit{
 	counter_name = 'Max-Total-Bandwidth'
 
-	check_name = 'CS-Total-Octets-Monthly'
+	check_name = 'CS-Total-Octets-Weekly'
 	reply_name = 'Session-Timeout'
 
 	sql_module_instance = sql

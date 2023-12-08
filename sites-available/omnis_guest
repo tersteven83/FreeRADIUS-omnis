@@ -36,8 +36,7 @@ authorize {
 	}
 	if(userlock){
 		update reply{
-			Reply-Message := "Votre heure de connexion est entre %{control:Login-Time}"
-
+			Reply-Message := "Votre heure de connexion est entre %{control:Login-Time}"		
 		}
 		reject
 	}
@@ -100,21 +99,21 @@ post-auth {
 	
 	if(!config:Expiration){	
 		# si l'utilisateur a une connexion de une journee, on definie sa date d'expiration +1jr
-		if(&SQL-Group == "Daily-Connection"){
+		if(&SQL-Group == "One Day"){
 			update{
 				&Expiration = "%{expr: %l + 86400}"
 			}
 		}
 
 		# si l'utilisateur a une connexion d'une semaine, on definie sa date d'expiration +7jrs
-		elsif(&SQL-Group == "Weekly-Connection"){
+		elsif(&SQL-Group == "One Week"){
 			update{
 				&Expiration = "%{expr: %l + 604800}"
 			}
 		}
 
 		# si l'utilisateur a une connexion de 1 mois, on definie sa date d'expiration +30jrs
-		elsif(&SQL-Group == "Monthly-Connection"){
+		elsif(&SQL-Group == "One Month"){
 			# verifier si l'AVP Expiration n'existe
 			update{
 				&Expiration = "%{expr: %l + 2592000}"
@@ -122,16 +121,23 @@ post-auth {
 		}
 	
 		# si l'utilisateur a une connexion de 3 mois, on definie sa date d'expiration 3mois
-		elsif(&SQL-Group == "3 Months"){
+		elsif(&SQL-Group == "Three Months"){
 			update{
 				&Expiration = "%{expr: %l + 7776000}"
 			}
 		}
 
 		# si l'utilisateur a une connexion de 6 mois, on definie sa date d'expiration 6mois
-		elsif(&SQL-Group == "6 Months"){
+		elsif(&SQL-Group == "Six Months"){
 			update{
 				&Expiration = "%{expr: %l + 15552000}"
+			}
+		}
+	
+		# si l'utilisateur a une connexion d'un an , on definie sa date d'expiration 6mois
+		elsif(&SQL-Group == "One Year"){
+			update{
+				&Expiration = "%{expr: %l + 31557600}"
 			}
 		}
 		if(&Expiration){
