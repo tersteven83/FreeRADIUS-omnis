@@ -26,8 +26,22 @@ authorize {
 	mschap
 	suffix
 	files
+	
+	# verifier si c'est un voucher code
+	if("%{%{Stripped-User-Name}:-%{User-Name}}" =~ /omnis_/){
+		update control{
+			Voucher-MAC := "%{sql: SELECT mac_address FROM voucher WHERE voucher_code='%{%{Stripped-User-Name}:-%{User-Name}}'}"
+		}
+		#si son adresse MAC n'est pas vide, on verifie si c'est le meme que l'utilisateur utilise
+		if(control:Voucher-MAC != "" && control:Voucher-MAC != "%{Calling-Station-Id}"){
+			update reply{
+				Reply-Message :="Ce code est deja utilise"
+			}
+			reject
+		}
+	}
+
 	sql
-	python3
 	# ty tsy maintsy farany
 	pap
 
@@ -91,6 +105,7 @@ session {
 }
 
 post-auth {
+	#python3
 	reply_log
 	sql
 	exec

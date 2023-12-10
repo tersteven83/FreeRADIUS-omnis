@@ -1,4 +1,4 @@
-#! usr/bin/env python3
+#! /usr/bin/python3
 from datetime import datetime
 import mysql.connector
 import sys
@@ -6,6 +6,7 @@ import radiusd
 
 
 def authorize(p):
+    
     print("***Authorize***")
     # Récupérer la date d'aujourd'hui
     ajd = datetime.now().date()
@@ -28,7 +29,6 @@ def authorize(p):
         c.execute(query, params)
         result = c.fetchone()
        # print("Adresse MAC: " + mac_address + " " +  result[5])
-
         if result is not None:
             # Vérification de l'adresse mac
             if result[5] is not None:
@@ -42,18 +42,20 @@ def authorize(p):
                 
             # si la date récupérée par notre requete est n'est pas aujourd'hui,
             # on rejete l'authentification de l'utilisateur
-            if result[4] is not None:
-                if result[4].date() != ajd:
-                    print(result[4].date())
-                    update_dict = {"config": (("Auth-Type", "Reject"),),
-                                   "reply": (("Reply-Message", ":=",
-                                              "Le code que vous avez entré est déjà utilisé"),)
-                                   }
+            #if result[4] is not None:
+             #   if result[4].date() != ajd:
+              #      print(result[4].date())
+               #     update_dict = {"config": (("Auth-Type", "Reject"),),
+                #                   "reply": (("Reply-Message", ":=",
+                 #                             "Le code que vous avez entré est déjà utilisé"),)
+                  #                 }
                     # print(update_dict)
-                    return radiusd.RLM_MODULE_REJECT, update_dict
+                   # return radiusd.RLM_MODULE_REJECT, update_dict
             else:
+#                return 0
                 return radiusd.RLM_MODULE_OK
-        
+
+#    db.close()    
         
         
 
@@ -73,7 +75,8 @@ def get_db():
     try:
         db = mysql.connector.connect(**connection_params)
         return db
-    except (Exception, mysql.connector.Error) as e:
+    #except (Exception, mysql.connector.Error) as e:
+    except mysql.connector.Error as e:
         print(f"Vérifier la connexion à la base de donnée {e}")
         sys.exit(1)
 

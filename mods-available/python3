@@ -14,8 +14,8 @@ python3 {
 	#  instances of the python module, each with a different path.
 	#
 	#python_path="${modconfdir}/${.:name}:/another_path/to/python_files"
-	python_path="${modconfdir}/${.:name}:/usr/local/lib/python3.9/dist-packages"
-#	python_path="/home/steevi/freeradius-python"
+	python_path="${modconfdir}/${.:name}:${modconfdir}/${.:name}/.venv/lib/python3.9/site-packages"
+	#python_path="/home/steevi/freeradius-python"
 	module = omnis
 #	module = example
 
