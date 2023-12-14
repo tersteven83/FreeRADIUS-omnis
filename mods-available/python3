@@ -36,7 +36,7 @@ python3 {
 #	func_detach = detach
 
 	mod_authorize = ${.module}
-	func_authorize = authorize
+#	func_authorize = authorize
 
 #	mod_authenticate = ${.module}
 #	func_authenticate = authenticate

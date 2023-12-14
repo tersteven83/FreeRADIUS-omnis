@@ -1,73 +1,47 @@
 #! /usr/bin/python3
-from datetime import datetime
+import datetime
 import mysql.connector
-import sys
-import radiusd
-
-
-def authorize(p):
-    
-    print("***Authorize***")
-    # Récupérer la date d'aujourd'hui
-    ajd = datetime.now().date()
-    #print(p)
-
-    # Récupérer la date du vouche
-    db = get_db()
-    with db.cursor() as c:
-        # get the username key
-        request = convert_tuple_to_dict(p["request"])
-        # config = convert_tuple_to_dict(p["config"])
-        # request = convert_tuple_to_dict(p)
-        username = request["User-Name"]
-        mac_address = request.get("Calling-Station-Id")
-        params = (username, )
-        # préparer la requête
-        query = "SELECT * FROM voucher WHERE voucher_code = %s"
-        # (id, voucher_code, is_active, telephone_number, date, mac_address)
-        
-        c.execute(query, params)
-        result = c.fetchone()
-       # print("Adresse MAC: " + mac_address + " " +  result[5])
-        if result is not None:
-            # Vérification de l'adresse mac
-            if result[5] is not None:
-                # si l'adresse mac dans la BD ne correspond pas au mac request, on n'autorise pas l'authentification
-                if mac_address is not None and mac_address != result[5]:
-                    update_dict = {"config": (("Auth-Type", "Reject"),),
-                                   "reply": (("Reply-Message", ":=",
-                                              "Le code que vous avez entré est déjà utilisé"),)
-                                   }
-                    return radiusd.RLM_MODULE_REJECT, update_dict
-                
-            # si la date récupérée par notre requete est n'est pas aujourd'hui,
-            # on rejete l'authentification de l'utilisateur
-            #if result[4] is not None:
-             #   if result[4].date() != ajd:
-              #      print(result[4].date())
-               #     update_dict = {"config": (("Auth-Type", "Reject"),),
-                #                   "reply": (("Reply-Message", ":=",
-                 #                             "Le code que vous avez entré est déjà utilisé"),)
-                  #                 }
-                    # print(update_dict)
-                   # return radiusd.RLM_MODULE_REJECT, update_dict
-            else:
-#                return 0
-                return radiusd.RLM_MODULE_OK
-
-#    db.close()    
-        
-        
+import sys, string, random, radiusd
 
 
 def post_auth(p):
+    """
+    créer un utilisateur et ajouter dans le fichier user de freeradius,
+    """
     print("***Post_Authentication***")
-    print(p)
-
+    db = get_db()
+    with db.cursor() as c:
+        # vérifier d'abord si l'utilisateur créer ne se trouve pas dansa base de donn�e
+        user = generate_random_string(6)
+        query = "SELECT * FROM number_auth WHERE code=%s"
+        c.execute(query, (user,))
+        result = c.fetchall()
+        while(result):
+            user = generate_random_string(6)
+            result = c.execute(query, user).fetchall()
+            
+        # ajouter l'utilisateur dans la table number_auth
+        query = "INSERT INTO number_auth (code, expiration) VALUES (%s, %s)"
+        
+        # la date d'expiration de cette compte est après 15min
+        now = datetime.datetime.now()
+        plus_15_min = now + datetime.timedelta(minutes=15)
+        #plus_15_min = plus_15_min.strftime("%B %d %Y %H:%M:%S")
+        
+        params = (
+            user, plus_15_min 
+        )
+        c.execute(query, params)
+        db.commit()
+        update_dict = {
+            'reply': (("Reply-Message", ":=", f"http://192.168.11.150:8080/auth/number/{user}"),)
+        }
+    
+    return radiusd.RLM_MODULE_UPDATED, update_dict
 
 def get_db():
     connection_params = {
-        'host': 'localhost',
+        'host': '192.168.11.251',
         'user': 'raduser',
         'password': 'radpass',
         'database': 'raddb'
@@ -94,3 +68,10 @@ def convert_tuple_to_dict(tuple_of_tuples):
         dictionary[key] = value
 
     return dictionary
+
+
+def generate_random_string(length):
+    letters_and_digits = string.ascii_letters + string.digits
+    random_string = ''.join(random.choice(letters_and_digits) for i in range(length))
+    return random_string
+

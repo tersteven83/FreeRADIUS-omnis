@@ -53,7 +53,7 @@ server buffered-sql {
 		#  a common naming scheme for detail files, then you can
 		#  have many detail file writers, and only one reader.
 		#
-		filename = "${radacctdir}/detail-*"
+		filename = "${radacctdir}/detail-*_:_*"
 
 		#
 		#  The server can read accounting packets from the
@@ -148,7 +148,7 @@ server buffered-sql {
 		#  Log traffic to an SQL database.
 		#
 		#  See "Accounting queries" in mods-config/sql/main/$driver/queries.conf
-	#	sql
+		sql
 
 
 		#  Cisco VoIP specific bulk accounting

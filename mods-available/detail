@@ -31,13 +31,13 @@ detail {
 	#  be ONE "listen" section reading detail files from a
 	#  particular directory.
 	#
-	filename = ${radacctdir}/%{%{Packet-Src-IP-Address}:-%{Packet-Src-IPv6-Address}}/detail-%Y%m%d
+#	filename = ${radacctdir}/%{%{Packet-Src-IP-Address}:-%{Packet-Src-IPv6-Address}}/detail-%Y%m%d
 
 	#
 	#  If you are using radrelay, delete the above line for "file",
 	#  and use this one instead:
 	#
-#	filename = ${radacctdir}/detail
+	filename = ${radacctdir}/detail-%{%{Packet-Src-IP-Address}:-%{Packet-Src-IPv6-Address}}_:_%Y%m%d
 
 	#
 	#  Most file systems can handly nearly the full range of UTF-8

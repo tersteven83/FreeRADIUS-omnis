@@ -27,6 +27,7 @@ authorize {
 	suffix
 	files
 	
+	
 	# verifier si c'est un voucher code
 	if("%{%{Stripped-User-Name}:-%{User-Name}}" =~ /omnis_/){
 		update control{
@@ -90,12 +91,12 @@ preacct{
 	}
 
 	acct_unique
-	suffix
+	suffix	
 }
 
 accounting {
 	detail
-	sql
+	#sql
 	exec
 	attr_filter.accounting_response
 }
@@ -111,6 +112,7 @@ post-auth {
 	exec
 	dailycounter
 	daily_limit
+	expire_on_login
 	
 	if(!config:Expiration){	
 		# si l'utilisateur a une connexion de une journee, on definie sa date d'expiration +1jr
@@ -166,10 +168,10 @@ post-auth {
 		attr_filter.access_reject
 		remove_reply_message_if_eap
 		if(SQL-Group == "Guest"){
-			update reply {
-				WISPr-Redirection-URL := "http://192.168.11.150:8080/auth/number"
-			}
-		}	
+			# trouver la configuration de la fonction utilisee ici dans
+			# /etc/freeradius/3.0/mods-config/python3/omnis.py fonction post_auth			
+			python3
+		}
 	}
 }
 }
