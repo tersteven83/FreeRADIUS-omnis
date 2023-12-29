@@ -34,7 +34,7 @@ def post_auth(p):
         c.execute(query, params)
         db.commit()
         update_dict = {
-            'reply': (("Reply-Message", ":=", f"http://192.168.11.150:8080/auth/number/{user}"),)
+            'reply': (("WISPr-Redirection-URL", ":=", f"http://192.168.11.150:8080/auth/number/{user}"),)
         }
     
     return radiusd.RLM_MODULE_UPDATED, update_dict

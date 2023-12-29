@@ -34,7 +34,7 @@ authorize {
 			Voucher-MAC := "%{sql: SELECT mac_address FROM voucher WHERE voucher_code='%{%{Stripped-User-Name}:-%{User-Name}}'}"
 		}
 		#si son adresse MAC n'est pas vide, on verifie si c'est le meme que l'utilisateur utilise
-		if(control:Voucher-MAC != "" && control:Voucher-MAC != "%{Calling-Station-Id}"){
+		if(control:Voucher-MAC != "" && control:Voucher-MAC != &Calling-Station-Id){
 			update reply{
 				Reply-Message :="Ce code est deja utilise"
 			}
@@ -69,7 +69,7 @@ authorize {
 
 authenticate {
 	Auth-Type PAP {
-		pap
+		pap	
 	}
 	Auth-Type CHAP{
 		chap
@@ -167,6 +167,9 @@ post-auth {
 		-sql
 		attr_filter.access_reject
 		remove_reply_message_if_eap
+		update reply{
+			Reply-Message = "Votre identifiant/mot de passe est incorrecte."
+		}
 		if(SQL-Group == "Guest"){
 			# trouver la configuration de la fonction utilisee ici dans
 			# /etc/freeradius/3.0/mods-config/python3/omnis.py fonction post_auth			
