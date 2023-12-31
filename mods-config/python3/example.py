@@ -54,7 +54,9 @@ def post_proxy(p):
 
 
 def authorize(p):
-  print("*** post_auth ***")
+  print("*** authorize ***")
+  print(p)
+  return radiusd.RLM_MODULE_OK
 
   # This is true when using pass_all_vps_dict
   if type(p) is dict:

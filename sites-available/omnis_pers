@@ -1,0 +1,98 @@
+server omnis_pers{
+listen {
+	type = auth
+	ipaddr = *
+	port = 2822
+	limit{
+		max_connections = 16
+		lifetime = 0
+		idle_time = 30
+	}
+}
+listen{
+	type = acct
+	ipaddr = *
+	port = 2823
+}
+authorize{
+	filter_username
+	preprocess
+	suffix
+	ldap
+	    #if ((ok || updated) && User-Password && !control:Auth-Type) {
+	     #   update {
+	      #      control:Auth-Type := ldap
+	       # }
+	    #}
+	files
+	python3
+
+	logintime{
+		userlock = 1
+	}
+	if(userlock){
+		update reply{
+			Reply-Message := "Votre heure de connexion est entre %{control:Login-Time}"		
+		}
+		reject
+	}
+
+	expiration{
+		userlock = 1
+	}
+	if(userlock){
+		update reply{
+			Reply-Message := "Votre session est expiré"
+		}
+		reject
+	}
+	pap
+}
+authenticate {
+	Auth-Type PAP{
+		pap
+	}
+	Auth-Type LDAP{
+		ldap
+	}
+}
+preacct{
+	preprocess
+	update request{
+		&FreeRADIUS-Acct-Session-Start-Time = "%{expr: %l - %{%{Acct-Session-Time}:-0} - %{%{Acct-Delay-Time}:-0}}"
+	}
+	acct_unique
+	suffix
+}
+accounting{
+	detail
+	sql
+	exec
+	attr_filter.accounting_response
+}
+session{
+	sql
+}
+post-auth{
+	if (session-state:User-Name && reply:User-Name && request:User-Name && (reply:User-Name == request:User-Name)) {
+		update reply{
+			&User-Name !* ANY
+		}
+	}
+	update {
+		&reply: += &session-state
+	}
+	reply_log
+	sql
+	ldap
+	exec
+	remove_reply_message_if_eap
+	Post-Auth-Type REJECT {
+		update reply{
+			Reply-Message = "Votre identifiant/mot de passe est incorrecte."
+		}
+		sql
+		attr_filter.access_reject
+	}
+}
+}

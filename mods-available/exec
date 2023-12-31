@@ -22,7 +22,7 @@
 #  See also "echo" for more sample configuration.
 #
 exec {
-	wait = no
+	wait = yes
 	input_pairs = request
 	shell_escape = yes
 	timeout = 10

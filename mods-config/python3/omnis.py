@@ -11,7 +11,7 @@ def post_auth(p):
     print("***Post_Authentication***")
     db = get_db()
     with db.cursor() as c:
-        # vérifier d'abord si l'utilisateur créer ne se trouve pas dansa base de donn�e
+        # vérifier d'abord si l'utilisateur créer ne se trouve pas dansa base de donn�e
         user = generate_random_string(6)
         query = "SELECT * FROM number_auth WHERE code=%s"
         c.execute(query, (user,))
@@ -39,9 +39,57 @@ def post_auth(p):
     
     return radiusd.RLM_MODULE_UPDATED, update_dict
 
+def authorize(p):
+    """
+    charger tous les AVP du group envoyé aux parametres dans le paquets config
+    """
+    config = convert_tuple_to_dict(p["config"])
+    if "Group" in config:
+        groups = config["Group"]
+        
+        # les requetes SQL au BD
+        group_check_query = "\
+            SELECT attribute, op, \
+            CASE \
+                    WHEN Attribute = 'Expiration' THEN DATE_FORMAT(STR_TO_DATE(Value, '%Y-%m-%d'), '%e %b %Y') \
+                    ELSE Value \
+            END AS Value \
+            FROM radgroupcheck \
+            WHERE groupname = %s \
+            ORDER BY id"
+        group_reply_query = "\
+            SELECT attribute,op, value \
+            FROM radgroupreply \
+            WHERE groupname = %s \
+            ORDER BY id"
+        avp = {
+            "reply": [],
+            "config": []    
+        }
+        db = get_db()
+        with db.cursor() as c:
+            for i in range(len(groups)):
+                c.execute(group_check_query, (groups[i],))
+                group_chk = c.fetchall()
+                for j in range(len(group_chk)):
+                    avp['config'].append(group_chk[j])
+                
+                c.execute(group_reply_query, (groups[i],))
+                group_repl = c.fetchall()
+                for j in range(len(group_repl)):
+                    avp['reply'].append(group_repl[j])
+            # convertir les keys de avp en tuple
+            avp['config'] = tuple(avp['config'])
+            avp['reply'] = tuple(avp['reply'])  
+            
+            return radiusd.RLM_MODULE_UPDATED, avp
+        
+        
+    
+
 def get_db():
     connection_params = {
-        'host': '192.168.11.251',
+        'host': '127.0.0.1',
         'user': 'raduser',
         'password': 'radpass',
         'database': 'raddb'
@@ -65,6 +113,11 @@ def convert_tuple_to_dict(tuple_of_tuples):
     """
     dictionary = {}
     for key, value in tuple_of_tuples:
+        if key in dictionary:
+            if type(dictionary[key]) == str:
+                dictionary[key] = [dictionary[key]]
+            dictionary[key].append(value)
+            continue
         dictionary[key] = value
 
     return dictionary

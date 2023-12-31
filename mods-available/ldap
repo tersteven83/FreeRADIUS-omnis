@@ -16,7 +16,7 @@ ldap {
 	#  - ldaps:// (LDAP over SSL)
 	#  - ldapi:// (LDAP over Unix socket)
 	#  - ldapc:// (Connectionless LDAP)
-	server = 'localhost'
+	server = 'draco.serv.com'
 #	server = 'ldap.rrdns.example.org'
 #	server = 'ldap.rrdns.example.org'
 
@@ -25,12 +25,12 @@ ldap {
 
 	#  Administrator account for searching and possibly modifying.
 	#  If using SASL + KRB5 these should be commented out.
-#	identity = 'cn=admin,dc=example,dc=org'
-#	password = mypass
+	identity = 'cn=admin,dc=omnis,dc=mg'
+	password = tozlife3
 
 	#  Unless overridden in another section, the dn from which all
 	#  searches will start from.
-	base_dn = 'dc=example,dc=org'
+	base_dn = 'dc=omnis,dc=mg'
 
 	#
 	#  You can run the 'ldapsearch' command line tool using the
@@ -68,7 +68,7 @@ ldap {
 	#
 	#  At a minimum you probably want to set KRB5_CLIENT_KTNAME.
 	#
-	sasl {
+#	sasl {
 		# SASL mechanism
 #		mech = 'PLAIN'
 
@@ -77,7 +77,7 @@ ldap {
 
 		# SASL realm. Used for kerberos.
 #		realm = 'example.org'
-	}
+#	}
 
 	#
 	#  Generic valuepair attribute
@@ -268,22 +268,23 @@ ldap {
 	#
 	group {
 		#  Where to start searching in the tree for groups
-		base_dn = "${..base_dn}"
+#		base_dn = "${..base_dn}"
+		base_dn = "ou=profiles,dc=omnis,dc=mg"
 
 		#  Filter for group objects, should match all available
 		#  group objects a user might be a member of.
 		#
 		#  If using Active Directory you are likely to need "group"
 		#  instead of "posixGroup".
-		filter = '(objectClass=posixGroup)'
+		filter = '(objectClass=groupOfNames)'
 
 		# Search scope, may be 'base', 'one', sub' or 'children'
-#		scope = 'sub'
+		scope = 'sub'
 
 		#  Attribute that uniquely identifies a group.
 		#  Is used when converting group DNs to group
 		#  names.
-#		name_attribute = cn
+		name_attribute = ou
 
 		#  Filter to find all group objects a user is a member of.
 		#  That is, group objects with attributes that
@@ -292,8 +293,9 @@ ldap {
 		#  Note that this configuration references the "user_dn"
 		#  configuration defined above.
 		#
-#		membership_filter = "(|(member=%{control:${..user_dn}})(memberUid=%{%{Stripped-User-Name}:-%{User-Name}}))"
-
+	#	membership_filter = "(|(member=%{control:${..user_dn}})(memberUid=%{%{Stripped-User-Name}:-%{User-Name}}))"
+#		membership_filter = "(|(member=%{control:${..user_dn}})(uniqueMember=%{control:${..user_dn}})"
+		membership_filter = "(member=%{control:${..user_dn}})"
 		#  The attribute, in user objects, which contain the names
 		#  or DNs of groups a user is a member of.
 		#
@@ -307,7 +309,7 @@ ldap {
 		#  the memberOf attribute then it is also possible that the
 		#  LDAP bind user does not have the correct permissions to
 		#  view it.
-		membership_attribute = 'memberOf'
+	#	membership_attribute = 'memberOf'
 
 		#  If cacheable_name or cacheable_dn are enabled,
 		#  all group information for the user will be
@@ -348,7 +350,7 @@ ldap {
 	#
 	profile {
 		#  Filter for RADIUS profile objects
-#		filter = '(objectclass=radiusprofile)'
+		filter = '(objectclass=radiusprofile)'
 
 		#  The default profile.  This may be a DN or an attribute
 		#  reference.
@@ -362,7 +364,7 @@ ldap {
 		#  retrieved from the user object, at the same time as the
 		#  attributes from the update section, are are applied
 		#  if authorization is successful.
-#		attribute = 'radiusProfileDn'
+		attribute = 'radiusProfileDn'
 	}
 
 	#
@@ -554,9 +556,9 @@ ldap {
 		# The StartTLS operation is supposed to be
 		# used with normal ldap connections instead of
 		# using ldaps (port 636) connections
-#		start_tls = yes
+		start_tls = yes
 
-#		ca_file	= ${certdir}/cacert.pem
+		ca_file	= ${certdir}/ca.pem
 
 #		ca_path	= ${certdir}
 #		certificate_file = /path/to/radius.crt
@@ -574,7 +576,7 @@ ldap {
 		#  The default is libldap's default, which varies based
 		#  on the contents of ldap.conf.
 
-#		require_cert	= 'demand'
+		require_cert	= 'demand'
 	}
 
 	#  As of version 3.0, the 'pool' section has replaced the

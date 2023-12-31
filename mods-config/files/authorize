@@ -208,3 +208,6 @@ DEFAULT	Hint == "SLIP"
 # You should add test accounts to the TOP of this file! #
 # See the example user "bob" above.                     #
 #########################################################
+DEFAULT Ldap-Group == directeur, Group := "Personnel", Group += "Monthly-Connection"
+	Fall-Through := yes
+DEFAULT Ldap-Group == personnel, Group := "Personnel", Group += "Yearly-Connection"

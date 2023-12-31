@@ -13,11 +13,11 @@ python3 {
 	#  item is GLOBAL TO THE SERVER.  That is, you cannot have two
 	#  instances of the python module, each with a different path.
 	#
-	#python_path="${modconfdir}/${.:name}:/another_path/to/python_files"
+#	python_path="${modconfdir}/${.:name}"
 	python_path="${modconfdir}/${.:name}:${modconfdir}/${.:name}/.venv/lib/python3.9/site-packages"
 	#python_path="/home/steevi/freeradius-python"
 	module = omnis
-#	module = example
+	#module = example
 
 	# Pass all VPS lists as a 6-tuple to the callbacks
 	# (request, reply, config, state, proxy_req, proxy_reply)
@@ -36,7 +36,7 @@ python3 {
 #	func_detach = detach
 
 	mod_authorize = ${.module}
-#	func_authorize = authorize
+	func_authorize = authorize
 
 #	mod_authenticate = ${.module}
 #	func_authenticate = authenticate
