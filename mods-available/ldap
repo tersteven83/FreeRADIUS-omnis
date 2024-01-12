@@ -16,7 +16,7 @@ ldap {
 	#  - ldaps:// (LDAP over SSL)
 	#  - ldapi:// (LDAP over Unix socket)
 	#  - ldapc:// (Connectionless LDAP)
-	server = 'draco.serv.com'
+	server = 'draco.serv.omnis.mg'
 #	server = 'ldap.rrdns.example.org'
 #	server = 'ldap.rrdns.example.org'
 
@@ -576,7 +576,7 @@ ldap {
 		#  The default is libldap's default, which varies based
 		#  on the contents of ldap.conf.
 
-		require_cert	= 'demand'
+		require_cert	= 'allow'
 	}
 
 	#  As of version 3.0, the 'pool' section has replaced the

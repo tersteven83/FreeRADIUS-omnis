@@ -211,3 +211,6 @@ DEFAULT	Hint == "SLIP"
 DEFAULT Ldap-Group == directeur, Group := "Personnel", Group += "Monthly-Connection"
 	Fall-Through := yes
 DEFAULT Ldap-Group == personnel, Group := "Personnel", Group += "Yearly-Connection"
+DEFAULT Ldap-Group == admins, Group := "Personnel", Group += "Yearly-Connection"
+	Class := admins,
+	Reply-Message := "Hello, admin!"

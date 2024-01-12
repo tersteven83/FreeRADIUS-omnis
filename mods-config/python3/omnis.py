@@ -46,7 +46,9 @@ def authorize(p):
     config = convert_tuple_to_dict(p["config"])
     if "Group" in config:
         groups = config["Group"]
-        
+        if(type(groups) == 'str'):
+            groups = [groups]
+
         # les requetes SQL au BD
         group_check_query = "\
             SELECT attribute, op, \
@@ -71,6 +73,7 @@ def authorize(p):
             for i in range(len(groups)):
                 c.execute(group_check_query, (groups[i],))
                 group_chk = c.fetchall()
+                
                 for j in range(len(group_chk)):
                     avp['config'].append(group_chk[j])
                 
@@ -82,6 +85,7 @@ def authorize(p):
             avp['config'] = tuple(avp['config'])
             avp['reply'] = tuple(avp['reply'])  
             
+            #print(avp)
             return radiusd.RLM_MODULE_UPDATED, avp
         
         
